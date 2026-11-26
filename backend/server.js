@@ -1,8 +1,9 @@
 require('dotenv').config();
+
 const app = require('./src/app');
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server Backend MIPA-Temu berjalan di http://localhost:${PORT}`);
+  console.log(`Backend MIPA-Temu berjalan di http://localhost:${PORT}`);
 });

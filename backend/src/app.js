@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const { getConnection } = require('./config/db');
 
 const authRoutes = require('./routes/authRoutes');
@@ -8,30 +9,63 @@ const claimRoutes = require('./routes/claimRoutes');
 const handoverRoutes = require('./routes/handoverRoutes');
 const custodyRoutes = require('./routes/custodyRoutes');
 
+const errorHandler = require('./middleware/errorHandler');
+
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+// Security headers
+app.use(helmet());
 
-// Endpoint untuk mengetes apakah backend & Oracle sudah terhubung
-app.get('/api/health', async (req, res) => {
+// CORS
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  })
+);
+
+// JSON limit
+app.use(express.json({ limit: '10kb' }));
+
+// Health check
+app.get('/api/health', async (req, res, next) => {
   let conn;
+
   try {
     conn = await getConnection();
-    const result = await conn.execute(`SELECT 'Koneksi Oracle Berhasil!' AS STATUS FROM DUAL`);
-    res.json({ success: true, oracle: result.rows[0].STATUS });
+
+    const result = await conn.execute(
+      `SELECT 'Koneksi Oracle Berhasil!' AS STATUS FROM DUAL`
+    );
+
+    res.status(200).json({
+      success: true,
+      oracle: result.rows[0].STATUS,
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Gagal terhubung ke Oracle', error: err.message });
+    next(err);
   } finally {
-    if (conn) await conn.close();
+    if (conn) {
+      await conn.close();
+    }
   }
 });
 
-// Daftarkan semua rute API
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/claims', claimRoutes);
 app.use('/api/handovers', handoverRoutes);
 app.use('/api/custody', custodyRoutes);
+
+// 404
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Endpoint tidak ditemukan.',
+  });
+});
+
+// Centralized error handler
+app.use(errorHandler);
 
 module.exports = app;

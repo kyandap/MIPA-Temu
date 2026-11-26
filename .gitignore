@@ -2,8 +2,10 @@
 node_modules/
 
 # Environment variables
+node_modules/
 .env
 .env.*
+!.env.example
 
 # Build files
 dist/
