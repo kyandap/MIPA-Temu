@@ -24,7 +24,6 @@ async function confirm(req, res, next) {
     const result = await confirmHandover({
       handoverId: req.body.handoverId,
       ownerId: req.user.userId,
-      code: req.body.code,
     });
 
     res.status(200).json({

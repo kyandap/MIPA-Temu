@@ -62,15 +62,14 @@ async function createHandover({ itemId, officerId }) {
   }
 }
 
-async function confirmHandover({ handoverId, ownerId, code }) {
+async function confirmHandover({ handoverId, ownerId }) {
   let conn;
 
   try {
     conn = await getConnection();
 
-    // Kunci record selama verifikasi
     const result = await conn.execute(
-      `SELECT HANDOVER_ID, OWNER_ID, STATUS, HANDOVER_CODE_HASH
+      `SELECT HANDOVER_ID, OWNER_ID, STATUS
        FROM HANDOVER_RECORDS
        WHERE HANDOVER_ID = :handoverId
        FOR UPDATE`,
@@ -93,17 +92,6 @@ async function confirmHandover({ handoverId, ownerId, code }) {
 
     if (handover.STATUS !== 'PENDING') {
       const err = new Error('Serah terima tidak lagi berstatus pending.');
-      err.status = 400;
-      throw err;
-    }
-
-    const validCode = await bcrypt.compare(
-      code,
-      handover.HANDOVER_CODE_HASH
-    );
-
-    if (!validCode) {
-      const err = new Error('Kode konfirmasi tidak valid.');
       err.status = 400;
       throw err;
     }

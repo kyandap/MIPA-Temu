@@ -8,7 +8,7 @@ const itemRoutes = require('./routes/itemRoutes');
 const claimRoutes = require('./routes/claimRoutes');
 const handoverRoutes = require('./routes/handoverRoutes');
 const custodyRoutes = require('./routes/custodyRoutes');
-
+const historyRoutes = require('./routes/historyRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -56,6 +56,7 @@ app.use('/api/items', itemRoutes);
 app.use('/api/claims', claimRoutes);
 app.use('/api/handovers', handoverRoutes);
 app.use('/api/custody', custodyRoutes);
+app.use('/api/history', historyRoutes);
 
 // 404
 app.use((req, res) => {

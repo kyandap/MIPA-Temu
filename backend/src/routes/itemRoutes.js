@@ -8,6 +8,7 @@ const validate = require('../middleware/validate');
 const {
   categories,
   catalog,
+  readyForHandover,
   report,
 } = require('../controllers/itemController');
 
@@ -18,6 +19,14 @@ router.get('/categories', categories);
 
 // Katalog publik
 router.get('/', catalog);
+
+// Daftar barang siap serah terima (petugas)
+router.get(
+  '/ready-for-handover',
+  authenticate,
+  authorize('OFFICER'),
+  readyForHandover
+);
 
 // Laporkan barang
 router.post(

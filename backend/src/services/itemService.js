@@ -41,6 +41,50 @@ async function getItems() {
   }
 }
 
+// Barang yang siap untuk proses serah terima oleh petugas
+async function getItemsReadyForHandover() {
+  let conn;
+
+  try {
+    conn = await getConnection();
+
+    const result = await conn.execute(
+      `SELECT
+          i.ITEM_ID,
+          i.ITEM_NAME,
+          i.STATUS,
+          c.USER_ID AS OWNER_ID,
+          u.FULL_NAME AS OWNER_NAME,
+          c.CLAIM_ID,
+          c.CLAIM_STATUS,
+          h.HANDOVER_ID,
+          h.STATUS AS HANDOVER_STATUS
+      FROM ITEMS i
+      JOIN CLAIMS c
+          ON i.ITEM_ID = c.ITEM_ID
+      JOIN USERS u
+          ON c.USER_ID = u.USER_ID
+      LEFT JOIN HANDOVER_RECORDS h
+          ON h.ITEM_ID = i.ITEM_ID
+      WHERE c.CLAIM_STATUS = 'APPROVED'
+        AND (
+            (i.STATUS = 'CLAIM_APPROVED' AND h.HANDOVER_ID IS NULL)
+            OR
+            (i.STATUS = 'CLAIM_APPROVED' AND h.STATUS = 'PENDING')
+            OR
+            (i.STATUS = 'RETURNED' AND h.STATUS = 'COMPLETED')
+        )
+      ORDER BY i.ITEM_ID DESC`
+    );
+
+    return result.rows;
+  } finally {
+    if (conn) {
+      await conn.close();
+    }
+  }
+}
+
 async function reportItem(data, userId) {
   let conn;
 
@@ -105,5 +149,6 @@ async function reportItem(data, userId) {
 module.exports = {
   getCategories,
   getItems,
+  getItemsReadyForHandover,
   reportItem,
 };

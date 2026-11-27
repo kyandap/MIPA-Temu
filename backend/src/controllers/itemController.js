@@ -1,6 +1,7 @@
 const {
   getCategories,
   getItems,
+  getItemsReadyForHandover,
   reportItem,
 } = require('../services/itemService');
 
@@ -46,8 +47,22 @@ async function report(req, res, next) {
   }
 }
 
+async function readyForHandover(req, res, next) {
+  try {
+    const data = await getItemsReadyForHandover();
+
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   categories,
   catalog,
+  readyForHandover,
   report,
 };

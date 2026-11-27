@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const handoverRateLimit = require('../middleware/handoverRateLimit');
 const authenticate = require('../middleware/authenticate');
 const authorize = require('../middleware/authorize');
 const validate = require('../middleware/validate');
@@ -20,7 +20,7 @@ router.use(authenticate);
 // Petugas membuat serah terima
 router.post(
   '/create',
-  authorize('PETUGAS'),
+  authorize('OFFICER'),
   validate(createHandoverSchema),
   create
 );
@@ -29,6 +29,7 @@ router.post(
 router.post(
   '/confirm',
   authorize('MAHASISWA'),
+  handoverRateLimit,
   validate(confirmHandoverSchema),
   confirm
 );

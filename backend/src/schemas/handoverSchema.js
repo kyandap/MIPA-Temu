@@ -6,7 +6,6 @@ const createHandoverSchema = z.object({
 
 const confirmHandoverSchema = z.object({
   handoverId: z.number().int().positive(),
-  code: z.string().trim().length(6),
 });
 
 module.exports = {
